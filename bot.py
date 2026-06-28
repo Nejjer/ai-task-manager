@@ -28,12 +28,14 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message.text
     user = update.effective_user.full_name
+    last_bot_message = context.chat_data.get("last_bot_message")
     logger.info("Сообщение от %s: %s", user, message)
 
     await update.message.chat.send_action(ChatAction.TYPING)
 
     try:
-        response = await run_agent(message)
+        response = await run_agent(message, last_bot_message=last_bot_message)
+        context.chat_data["last_bot_message"] = response
         await update.message.reply_text(response)
     except Exception as e:
         logger.error("Ошибка агента: %s", e)
